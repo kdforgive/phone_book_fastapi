@@ -31,18 +31,34 @@
 # ]
 # print(x[0]['ttl'])
 
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
+#
+# # date_string = "2022-09-22 22:38:50.684320"
+# date_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# date_object = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
+# delta = timedelta(hours=date_object.hour, minutes=date_object.minute, seconds=date_object.second)
+# ttl = datetime.strptime("00:02:00", '%H:%M:%S')
+# delta2 = timedelta(hours=ttl.hour, minutes=ttl.minute, seconds=ttl.second)
+# # print(date_object)
+# # print(delta)
+# # print(delta2)
+# # print(date_object + delta2)
+#
+# print(datetime.now().replace(microsecond=0))
+# print(type(datetime.now().replace(microsecond=0)))
 
-# date_string = "2022-09-22 22:38:50.684320"
-date_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-date_object = datetime.strptime(date_string, "%Y-%m-%d %H:%M:%S")
-delta = timedelta(hours=date_object.hour, minutes=date_object.minute, seconds=date_object.second)
-ttl = datetime.strptime("00:02:00", '%H:%M:%S')
-delta2 = timedelta(hours=ttl.hour, minutes=ttl.minute, seconds=ttl.second)
-# print(date_object)
-# print(delta)
-# print(delta2)
-# print(date_object + delta2)
+from fastapi import APIRouter, HTTPException, status, Depends, Cookie
+from sqlalchemy.orm import Session
+from api.mock import api_models
+from db import database
+from typing import Optional
 
-print(datetime.now().replace(microsecond=0))
-print(type(datetime.now().replace(microsecond=0)))
+
+SESSION_TOKEN = "4gg|ll/64~a~mix+364-*x;95~nh1|5gssnqa3vh35i32gle,cld9emx^|pv~i8x,6i$c9y,#<o,*umjqoudp$?g2??<ql$2#5pq<^$6!/35g@*i91sn7mu@"
+
+
+def say_hello(db: Session = Depends(database.get_db)):
+    # 1 достать из базы данных всю запись сесии по токену(user_id, creation_time, ttl)
+    # TODO убедиться что нет коллизий, если они могут быть надо сделать так что бы их не было
+    session = db.query(api_models.Sessions).filter(api_models.Sessions.token == SESSION_TOKEN).first()
+    return session
