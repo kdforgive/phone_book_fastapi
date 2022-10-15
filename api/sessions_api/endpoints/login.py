@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
 from core import schemas, token_
-from db import database
+from db import database, api_models
 from sqlalchemy.orm import Session
 from core.hashing import Hash
 from datetime import datetime, timedelta
-from api.mock import api_models
 
 router = APIRouter()
 
@@ -17,9 +16,17 @@ def login(request: schemas.Login, response: Response, db: Session = Depends(data
     if not Hash.verify_password(request.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect username or password')
 
-    # create access token
+    # create ttl
     access_token_expires = timedelta(seconds=token_.ACCESS_TOKEN_EXPIRE_SECONDS)
-    access_token = token_.create_access_token()
+
+    # check db for collisions
+    # TODO если существует сессия с таким токеном то мы просто генерируем новый токен пока не создадим уникальный
+    while True:
+        access_token = token_.create_access_token()
+        sessions_count = db.query(api_models.Sessions).filter(api_models.Sessions.token == access_token).count()
+        if sessions_count > 0:
+            continue
+        break
 
     # add token to session table
     new_session = api_models.Sessions(user_id=user.id, token=access_token,
@@ -28,4 +35,4 @@ def login(request: schemas.Login, response: Response, db: Session = Depends(data
     db.commit()
     db.refresh(new_session)
     response.set_cookie(key='session_token', value=access_token)
-    return 'access token created'
+    return 'access token created', sessions_count

@@ -19,10 +19,14 @@ class Users(Base):
     def __getitem__(self, field):
         return self.__dict__[field]
 
+    @staticmethod
+    def get_user_info_by_column(column_name, db):
+        return db.query(Users).filter(Users.id == column_name).one()
+
     # def add_user_if_not_exist()
-        # return db.add(new_user)
-    #            db.commit()
-    #            db.refresh(new_user)
+    #   db.add(new_user)
+    #     db.commit()
+    #     db.refresh(new_user)
 
 
 class Sessions(Base):
@@ -39,6 +43,15 @@ class Sessions(Base):
     # https://stackoverflow.com/questions/59011757/access-sqlalchemy-class-field-inexplicitly-and-fix-object-is-not-subscriptable
     def __getitem__(self, field):
         return self.__dict__[field]
+
+    @staticmethod
+    def get_session_by_session_token(session_token, db):
+        return db.query(Sessions).filter(Sessions.token == session_token).first()
+
+    @staticmethod
+    def delete_session_by_session_token(session_token, db):
+        db.query(Sessions).filter(Sessions.token == session_token).delete()
+        db.commit()
 
 
 class Money(Base):

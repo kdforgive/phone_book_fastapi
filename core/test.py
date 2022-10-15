@@ -47,12 +47,9 @@
 # print(datetime.now().replace(microsecond=0))
 # print(type(datetime.now().replace(microsecond=0)))
 
-from fastapi import APIRouter, HTTPException, status, Depends, Cookie
+from fastapi import Depends
 from sqlalchemy.orm import Session
-from api.mock import api_models
-from db import database
-from typing import Optional
-
+from db import database, api_models
 
 SESSION_TOKEN = "4gg|ll/64~a~mix+364-*x;95~nh1|5gssnqa3vh35i32gle,cld9emx^|pv~i8x,6i$c9y,#<o,*umjqoudp$?g2??<ql$2#5pq<^$6!/35g@*i91sn7mu@"
 
