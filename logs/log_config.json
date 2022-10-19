@@ -1,0 +1,25 @@
+{
+    "version":1,
+    "root":{
+        "handlers" : ["console", "file"],
+        "level": "INFO"
+    },
+     "handlers":{
+            "console":{
+                "formatter": "std_out",
+                "class": "logging.StreamHandler",
+                "level": "DEBUG"
+            },
+            "file":{
+                "formatter":"std_out",
+                "class":"logging.FileHandler",
+                "level":"INFO",
+                "filename":"logs/all_messages.log"
+            }
+        },
+    "formatters": {
+        "std_out": {
+            "format": "%(asctime)s:%(name)s:%(message)s"
+        }
+    }
+}

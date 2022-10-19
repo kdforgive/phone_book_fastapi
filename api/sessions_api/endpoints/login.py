@@ -4,8 +4,18 @@ from db import database, api_models
 from sqlalchemy.orm import Session
 from core.hashing import Hash
 from datetime import datetime, timedelta
+import logging
+from logs.setup_logging import read_log_config
 
 router = APIRouter()
+
+read_log_config()
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+# handler = logging.FileHandler('logs/login.log')
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
 
 
 @router.post('/login')
@@ -35,4 +45,5 @@ def login(request: schemas.Login, response: Response, db: Session = Depends(data
     db.commit()
     db.refresh(new_session)
     response.set_cookie(key='session_token', value=access_token)
-    return 'access token created', sessions_count
+    # return 'access token created'
+    logger.info('access token created')

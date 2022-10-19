@@ -1,2 +1,15 @@
 .idea
-__pycache__
+__pycache_
+logs/all_messages.log
+logs/login.log
+logs/user.log
+__pycache__/
+api/sessions_api/__pycache__/
+api/sessions_api/endpoints/__pycache__/
+core/__pycache__/
+db/__pycache__/
+logs/__pycache__/
+settings/__pycache__/
+tests/unit/__pycache__/
+
+

@@ -3,19 +3,18 @@ from db import database, api_models
 from typing import Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-import logging
+import logging.config
+from logs.setup_logging import read_log_config
 
 router = APIRouter()
 
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
-# formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s')
-# file_handler = logging.FileHandler('user.log')
-# file_handler.setFormatter(formatter)
-# logger.addHandler(file_handler)
-
-# logging.basicConfig(filename='user.log', level=logging.DEBUG,
-#                     format='%(asctime)s:%(levelname)s:%(message)s')
+read_log_config()
+logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+# handler = logging.FileHandler('logs/user.log')
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
 
 
 @router.get('/say_hello', status_code=200)
@@ -26,7 +25,6 @@ def say_hello(session_token: Optional[str] = Cookie(None), db: Session = Depends
     # TODO переделать обращения к базе данных(инкапсулировать запросы к БД внутри классов api_models.Sessions)
     session = api_models.Sessions.get_session_by_session_token(session_token, db)
     if not session:
-        logging.debug(f'no session')
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     # 3 мы должны создать datetime object с финальным валидным верменем(creation_time + ttl)
     # strptime() method creates a datetime object from the given string.
@@ -41,9 +39,11 @@ def say_hello(session_token: Optional[str] = Cookie(None), db: Session = Depends
     if datetime_current > datetime_ttl:
         # TODO если не валидо надо удалить сессию из таблицы
         api_models.Sessions.delete_session_by_session_token(session_token, db)
+        logger.debug(f'token has expired')
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     # 6 используя user_id из таблицы Users вытащить user_name
     column_name = session['user_id']
     username = api_models.Users.get_user_info_by_column(column_name, db)
     # 7 отправть респонс Hello user_name
+    logger.debug('get user_name')
     return f'Hello {username["user_name"]}'
