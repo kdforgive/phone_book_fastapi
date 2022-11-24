@@ -19,12 +19,16 @@ class Users(Base):
     def __getitem__(self, field):
         return self.__dict__[field]
 
-    @staticmethod
-    def get_user_info_by_column(column_name, db):
+    @classmethod
+    def get_user_info_by_column(cls, column_name, db):
         return db.query(Users).filter(Users.id == column_name).one()
 
+    @classmethod
+    def get_user_name(cls, username, db):
+        return db.query(Users).filter(Users.user_name == username).first()
+
     # def add_user_if_not_exist()
-    #   db.add(new_user)
+    #     db.add(new_user)
     #     db.commit()
     #     db.refresh(new_user)
 
@@ -44,14 +48,25 @@ class Sessions(Base):
     def __getitem__(self, field):
         return self.__dict__[field]
 
-    @staticmethod
-    def get_session_by_session_token(session_token, db):
+    @classmethod
+    def get_session_by_session_token(cls, session_token, db):
         return db.query(Sessions).filter(Sessions.token == session_token).first()
 
-    @staticmethod
-    def delete_session_by_session_token(session_token, db):
+    @classmethod
+    def delete_session_by_session_token(cls, session_token, db):
         db.query(Sessions).filter(Sessions.token == session_token).delete()
         db.commit()
+
+    @classmethod
+    def count_session_by_session_token(cls, session_token, db):
+        return db.query(Sessions).filter(Sessions.token == session_token).count()
+
+    @classmethod
+    def add_token_to_sessions_table(cls, user_id, access_token, datetime, access_token_expires, db):
+        new_session = Sessions(user_id=user_id, token=access_token, creation_time=datetime, ttl=access_token_expires)
+        db.add(new_session)
+        db.commit()
+        db.refresh(new_session)
 
 
 class Money(Base):

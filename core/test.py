@@ -47,15 +47,53 @@
 # print(datetime.now().replace(microsecond=0))
 # print(type(datetime.now().replace(microsecond=0)))
 
-from fastapi import Depends
-from sqlalchemy.orm import Session
-from db import database, api_models
 
-SESSION_TOKEN = "4gg|ll/64~a~mix+364-*x;95~nh1|5gssnqa3vh35i32gle,cld9emx^|pv~i8x,6i$c9y,#<o,*umjqoudp$?g2??<ql$2#5pq<^$6!/35g@*i91sn7mu@"
+# from fastapi import Depends
+# from sqlalchemy.orm import Session
+# from db import database, api_models
+#
+# SESSION_TOKEN = "4gg|ll/64~a~mix+364-*x;95~nh1|5gssnqa3vh35i32gle,cld9emx^|pv~i8x,6i$c9y,#<o,*umjqoudp$?g2??<ql$2#5pq<^$6!/35g@*i91sn7mu@"
+#
+#
+# def say_hello(db: Session = Depends(database.get_db)):
+#     # 1 достать из базы данных всю запись сесии по токену(user_id, creation_time, ttl)
+#     # TODO убедиться что нет коллизий, если они могут быть надо сделать так что бы их не было
+#     session = db.query(api_models.Sessions).filter(api_models.Sessions.token == SESSION_TOKEN).first()
+#     return session
 
+import json
+from logs import logging_config
+read_data = {
+                                "version":1,
+                                "root":{
+                                    "handlers": ["console", "file"],
+                                    "level": "DEBUG"
+                                },
+                                "loggers": {
+                                    "main_logger": {"handlers": ["console"], "propagate": False}
+                                },
+                                "handlers":{
+                                        "console":{
+                                            "formatter": "console_fmt",
+                                            "class": "logging.StreamHandler",
+                                            "level": "INFO"
+                                        },
+                                        "file":{
+                                            "formatter":"file_fmt",
+                                            "class":"logging.FileHandler",
+                                            "level":"INFO",
+                                            "filename":"logs/all_messages.log"
+                                        }
+                                    },
+                                "formatters": {
+                                    "console_fmt": {
+                                        "format": "%(levelname)s:   %(name)s - %(message)s"
+                                    },
+                                    "file_fmt": {
+                                        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                                    }
+                                }
+                            }
 
-def say_hello(db: Session = Depends(database.get_db)):
-    # 1 достать из базы данных всю запись сесии по токену(user_id, creation_time, ttl)
-    # TODO убедиться что нет коллизий, если они могут быть надо сделать так что бы их не было
-    session = db.query(api_models.Sessions).filter(api_models.Sessions.token == SESSION_TOKEN).first()
-    return session
+print(type(read_data))
+print(get_logging_config())
