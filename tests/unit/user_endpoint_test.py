@@ -37,7 +37,7 @@ class ResponseTest(unittest.TestCase):
         db.commit()
         cls.__user_name = 'test_user'
         cls.__password = "test_password"
-        # cls._token = cls.get_session_token()
+        cls._token = cls.get_session_token()
 
     @classmethod
     def tearDownClass(cls):
@@ -45,6 +45,7 @@ class ResponseTest(unittest.TestCase):
         mycursor.execute(f"DELETE FROM users WHERE id=-1")
         db.commit()
 
+    @classmethod
     def get_session_token(self):
         # TODO вынести юзернейм и псворд в одельные переменные вне метода (time 1:17:20)
         data = {"username": self.__user_name, "password": self.__password}

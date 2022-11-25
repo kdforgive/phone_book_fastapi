@@ -14,7 +14,7 @@ class Users(Base):
     phone_number = Column(String(20), unique=False, nullable=False)
     password = Column(String(100), unique=True, nullable=False)
 
-    items = relationship("Sessions", back_populates="owner")
+    items = relationship("Sessions", back_populates="owner", cascade="all, delete")
 
     def __getitem__(self, field):
         return self.__dict__[field]
@@ -42,7 +42,7 @@ class Sessions(Base):
     creation_time = Column(String(50), nullable=False)
     ttl = Column(String(50), nullable=False)
 
-    owner = relationship("Users", back_populates="items")
+    owner = relationship("Users", back_populates="items", cascade="all, delete")
 
     # https://stackoverflow.com/questions/59011757/access-sqlalchemy-class-field-inexplicitly-and-fix-object-is-not-subscriptable
     def __getitem__(self, field):
