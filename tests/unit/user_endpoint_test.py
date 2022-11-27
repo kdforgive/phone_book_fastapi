@@ -46,9 +46,9 @@ class ResponseTest(unittest.TestCase):
         db.commit()
 
     @classmethod
-    def get_session_token(self):
+    def get_session_token(cls):
         # TODO вынести юзернейм и псворд в одельные переменные вне метода (time 1:17:20)
-        data = {"username": self.__user_name, "password": self.__password}
+        data = {"username": cls.__user_name, "password": cls.__password}
         response = client.post('/v1/login', json.dumps(data))
         client.cookies.clear()
         return response.cookies.get('session_token')
