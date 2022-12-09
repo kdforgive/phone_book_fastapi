@@ -24,9 +24,9 @@ mycursor.execute('USE fastapi_homework1')
 # (1, '111', '123');
 # """
 
-mycursor.execute(f"INSERT INTO users (user_name, age, sex, phone_number, password)"
-                 f" VALUES ('user1', '18', 'male', '1112223333', '{Hash.bcrypt('password1')}')")
-db.commit()
+# mycursor.execute(f"INSERT INTO users (user_name, age, sex, phone_number, password)"
+#                  f" VALUES ('user1', '18', 'male', '1112223333', '{Hash.bcrypt('password1')}')")
+# db.commit()
 # mycursor.execute(f"INSERT INTO money (user_id, balance, credit_balance)"
 #                  f" VALUES ('1', '111', '123')")
 
@@ -46,3 +46,36 @@ db.commit()
 #     db.commit()
 #     db.refresh(new_entry)
 #     return new_entry
+
+
+# mycursor.execute("INSERT INTO contact_groups(group_id, group_name)"
+#                  "VALUES"
+#                  "(1, 'not assigned'),"
+#                  "(2, 'work'),"
+#                  "(3, 'family')")
+mycursor.execute("INSERT INTO contacts(user_id, name, phone, group_name)"
+                 "VALUES"
+                 "(1, 'a', '12345', 'not assigned'),"
+                 "(1, 'b', '12344', 'not assigned'),"
+                 "(1, 'c', '12346', 'family')")
+db.commit()
+
+# x = """
+#     SELECT contacts.name, contacts.group_id, contact_groups.group_name
+#     FROM contacts
+#     INNER JOIN contact_groups
+#     ON contacts.group_id = contact_groups.group_id
+#     WHERE contacts.group_id = 1
+#     """
+# mycursor.execute(x)
+# mycursor = mycursor.fetchall()
+# for x in mycursor:
+#     print(x)
+# db.close()
+
+# x = text(
+#     f"SELECT contacts.name, contacts.group_id, contact_groups.group_name FROM contacts INNER JOIN contact_groups ON contacts.group_id = contact_groups.group_id WHERE contacts.group_id = 1"
+#     )
+# return db.execute(x).all()
+
+# return db.query(Contacts.name, ContactGroups.group_name).join(ContactGroups).filter(Contacts.group_id == 1).all()

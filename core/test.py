@@ -63,37 +63,4 @@
 
 import json
 from logs import logging_config
-read_data = {
-                                "version":1,
-                                "root":{
-                                    "handlers": ["console", "file"],
-                                    "level": "DEBUG"
-                                },
-                                "loggers": {
-                                    "main_logger": {"handlers": ["console"], "propagate": False}
-                                },
-                                "handlers":{
-                                        "console":{
-                                            "formatter": "console_fmt",
-                                            "class": "logging.StreamHandler",
-                                            "level": "INFO"
-                                        },
-                                        "file":{
-                                            "formatter":"file_fmt",
-                                            "class":"logging.FileHandler",
-                                            "level":"INFO",
-                                            "filename":"logs/all_messages.log"
-                                        }
-                                    },
-                                "formatters": {
-                                    "console_fmt": {
-                                        "format": "%(levelname)s:   %(name)s - %(message)s"
-                                    },
-                                    "file_fmt": {
-                                        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                                    }
-                                }
-                            }
 
-print(type(read_data))
-print(get_logging_config())

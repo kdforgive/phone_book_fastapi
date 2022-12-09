@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Response
-from core import schemas, token_
-from db import database, api_models
+from core import schemas
+from core import token_
+from db import database
+from db import api_models
 from sqlalchemy.orm import Session
 from core.hashing import Hash
 from datetime import datetime, timedelta
@@ -8,11 +10,10 @@ import logging
 
 
 router = APIRouter()
-
 logger = logging.getLogger(__name__)
 
 
-@router.post('/login')
+@router.post('/login', status_code=200, tags=['user session'])
 def login(request: schemas.Login, response: Response, db: Session = Depends(database.get_db)):
     user = api_models.Users.get_user_name(request.username, db)
     if not user:
