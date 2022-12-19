@@ -1,8 +1,8 @@
-from fastapi import HTTPException, status
 from db.database import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, ForeignKey, Integer, String, select, text
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.mysql import INTEGER
+from core.endpoint_checks import EndpointFieldValidation
 
 
 class Contacts(Base):
@@ -37,30 +37,32 @@ class Contacts(Base):
                 field_value: str
                 fields_to_show = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
         """
-
         all_fields_from_contact_query = db.query(Contacts.name, Contacts.surname, Contacts.phone, Contacts.email,
                                                  Contacts.company, ContactGroups.group_name).join(ContactGroups) \
             .filter(getattr(Contacts, field_name) == field_value).all()
 
-        if not all_fields_from_contact_query:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'wrong field_name or field_value data '
-                                                                              f'or record is missing')
-        fields_names = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
         fields_to_show_list = []
+        one_dict_from_response = {}
+        allowed_fields = EndpointFieldValidation.allowed_fields_check(field_name, field_value, db)
         for i in range(len(all_fields_from_contact_query)):
-            one_dict_from_response = {}
-            fields_to_show_list.append(one_dict_from_response)
-            one_dict_from_response.clear()
             for field in fields_to_show:
-                if field not in fields_names:
-                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                        detail=f'wrong field_name or field_value data '
-                                               f'or record is missing')
                 field_in_response = all_fields_from_contact_query[i][field]
-                if field in all_fields_from_contact_query[i].keys():
+                if field in allowed_fields:
                     one_dict_from_response[field] = field_in_response
+            fields_to_show_list.append(one_dict_from_response)
 
         return fields_to_show_list if fields_to_show != [] else all_fields_from_contact_query
+
+    @classmethod
+    def update_contact(cls, field_name, field_value, field_name_to_change, field_value_to_change, db):
+        db.query(Contacts).filter(getattr(Contacts, field_name) == field_value) \
+            .update({field_name_to_change: field_value_to_change})
+        db.commit()
+
+    @classmethod
+    def delete_contact(cls, field_name, field_value, db):
+        db.query(Contacts).filter(getattr(Contacts, field_name) == field_value).delete()
+        db.commit()
 
 
 class ContactGroups(Base):
