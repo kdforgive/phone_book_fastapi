@@ -42,7 +42,8 @@ class EndpointFieldValidation:
     @staticmethod
     def allowed_fields_check(field_name, field_value, db, field_name_to_change=None):
         # allowed_fields = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
-        allowed_fields = list(schemas.CreateContact().__dict__.keys())
+        # allowed_fields = list(schemas.CreateContact().__dict__.keys())
+        allowed_fields = [key for key in schemas.CreateContact().__dict__]
         if field_name not in allowed_fields:
             return False
         if field_name_to_change is not None and field_name_to_change not in allowed_fields:
