@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 @router.post('/create_contact', status_code=200, tags=['contacts'])
 def create_contact(contact: schemas.CreateContact, session_token: Optional[str] = Cookie(None),
-                   db: Session = Depends(database.get_db)):
+                   db: Session = Depends(database.get_db)) -> None:
+
     session = EndpointSessionValidation.session_check(session_token, db)
     if not EndpointSessionValidation.ttl_check(session, session_token, db):
         logger.info(f'token has expired')

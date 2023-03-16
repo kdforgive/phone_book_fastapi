@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Login(BaseModel):
@@ -7,27 +8,72 @@ class Login(BaseModel):
 
 
 class CreateContact(BaseModel):
-    name: str = None
-    surname: str = None
-    phone: str = None
-    email: str = None
-    company: str = None
-    group_name: str = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    company: Optional[str] = None
+    group_name: Optional[str] = None
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'name': 'a',
+                'phone': '12345',
+                'email': 'aa@a.com',
+                'group_name': 'family',
+                'id': 's_9'
+            }
+        }
+
+
+class CreateContactResponse(CreateContact):
+    id: str
 
 
 class SelectFields(BaseModel):
     field_name: str
     field_value: str
-    fields_to_show: list
+    fields_to_show: Optional[list]
+
+    class Config:
+        schema_extra = {
+            'example': {
+                "field_name": "name",
+                "field_value": "a",
+                "fields_to_show": [
+                    "name",
+                    "phone",
+                    "email",
+                    "group_name"
+                ]
+            }
+        }
 
 
 class ChangeFields(BaseModel):
-    field_name: str
-    field_value: str
+    field_id: str
     field_name_to_change: str
     field_value_to_change: str
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'field_id': 's_9',
+                'field_name_to_change': 'email',
+                'field_value_to_change': 'aa@a.com'
+            }
+        }
 
 
 class DeleteContact(BaseModel):
     field_name: str
     field_value: str
+
+    class Config:
+        schema_extra = {
+            'example': {
+                'field_name': 'name',
+                'field_value': 'd'
+            }
+        }

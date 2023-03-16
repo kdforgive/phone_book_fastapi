@@ -53,12 +53,12 @@ mycursor.execute('USE fastapi_homework1')
 #                  "(1, 'not assigned'),"
 #                  "(2, 'work'),"
 #                  "(3, 'family')")
-mycursor.execute("INSERT INTO contacts(user_id, name, phone, group_name)"
-                 "VALUES"
-                 "(1, 'a', '12345', 'not assigned'),"
-                 "(1, 'b', '12344', 'not assigned'),"
-                 "(1, 'c', '12346', 'family')")
-db.commit()
+# mycursor.execute("INSERT INTO contacts(user_id, name, phone, group_name)"
+#                  "VALUES"
+#                  "(1, 'a', '12345', 'not assigned'),"
+#                  "(1, 'b', '12344', 'not assigned'),"
+#                  "(1, 'c', '12346', 'family')")
+# db.commit()
 
 # x = """
 #     SELECT contacts.name, contacts.group_id, contact_groups.group_name
@@ -79,3 +79,17 @@ db.commit()
 # return db.execute(x).all()
 
 # return db.query(Contacts.name, ContactGroups.group_name).join(ContactGroups).filter(Contacts.group_id == 1).all()
+
+# x = """
+#     SELECT contacts.name, contacts.search_hashed_id,
+#     search_hashed_id.search_id, search_hashed_id.field_name, search_hashed_id.field_value
+#     FROM contacts
+#     INNER JOIN search_hashed_id
+#     ON contacts.search_hashed_id = search_hashed_id.search_id
+#     """
+#
+# mycursor.execute(x)
+# mycursor = mycursor.fetchall()
+# for x in mycursor:
+#     print(x)
+# db.close()

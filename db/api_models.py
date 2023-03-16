@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.mysql import INTEGER
 from core.endpoint_checks import EndpointFieldValidation
+from core.hashing import Hash
 
 
 class Contacts(Base):
@@ -10,7 +11,7 @@ class Contacts(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False)
-    name = Column(String(50), unique=False, nullable=False)
+    name = Column(String(50), unique=True, nullable=False)
     surname = Column(String(50))
     phone = Column(String(20))
     email = Column(String(50))
@@ -32,30 +33,42 @@ class Contacts(Base):
 
     @classmethod
     def select_contacts(cls, field_name, field_value, fields_to_show, db):
-        """
-                field_name: str
-                field_value: str
-                fields_to_show = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
+        """Description
+
+        Args:
+            fields_to_show:
+            field_name: str
+            field_value: str
+            fields_to_show = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
+
+        Returns:
+            description about return type
         """
         all_fields_from_contact_query = db.query(Contacts.name, Contacts.surname, Contacts.phone, Contacts.email,
                                                  Contacts.company, ContactGroups.group_name).join(ContactGroups) \
             .filter(getattr(Contacts, field_name) == field_value).all()
 
         fields_to_show_list = []
-        one_dict_from_response = {}
         allowed_fields = EndpointFieldValidation.allowed_fields_check(field_name, field_value, db)
         for i in range(len(all_fields_from_contact_query)):
+            one_dict_from_response = {}
             for field in fields_to_show:
                 field_in_response = all_fields_from_contact_query[i][field]
                 if field in allowed_fields:
                     one_dict_from_response[field] = field_in_response
+            # add id field to one_dict_from_response only if in selection all_fields_from_contact_query
+            # has one response, we can't change multiple field at once
+            if len(all_fields_from_contact_query) < 2:
+                get_contact_id = cls.get_contact_id(field_name, field_value, db)
+                encoded_contact_id = Hash.encoded_id(str(get_contact_id['id']))
+                one_dict_from_response['id'] = encoded_contact_id
             fields_to_show_list.append(one_dict_from_response)
 
-        return fields_to_show_list if fields_to_show != [] else all_fields_from_contact_query
+        return fields_to_show_list if fields_to_show else all_fields_from_contact_query
 
     @classmethod
-    def update_contact(cls, field_name, field_value, field_name_to_change, field_value_to_change, db):
-        db.query(Contacts).filter(getattr(Contacts, field_name) == field_value) \
+    def update_contact(cls, field_id, field_name_to_change, field_value_to_change, db):
+        db.query(Contacts).filter(Contacts.id == field_id) \
             .update({field_name_to_change: field_value_to_change})
         db.commit()
 
@@ -63,6 +76,10 @@ class Contacts(Base):
     def delete_contact(cls, field_name, field_value, db):
         db.query(Contacts).filter(getattr(Contacts, field_name) == field_value).delete()
         db.commit()
+
+    @classmethod
+    def get_contact_id(cls, field_name, field_value, db):
+        return db.query(Contacts.id).filter(getattr(Contacts, field_name) == field_value).first()
 
 
 class ContactGroups(Base):

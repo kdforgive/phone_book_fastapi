@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.post('/login', status_code=200, tags=['user session'])
-def login(request: schemas.Login, response: Response, db: Session = Depends(database.get_db)):
+def login(request: schemas.Login, response: Response, db: Session = Depends(database.get_db)) -> None:
     user = api_models.Users.get_user_name(request.username, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect username or password')

@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 @router.delete('/delete_contact', status_code=200, tags=['contacts'])
 def delete_contact(field: schemas.DeleteContact, session_token: Optional[str] = Cookie(None),
-                   db: Session = Depends(database.get_db)):
+                   db: Session = Depends(database.get_db)) -> None:
+
     session = EndpointSessionValidation.session_check(session_token, db)
     if not EndpointSessionValidation.ttl_check(session, session_token, db):
         logger.info(f'token has expired')

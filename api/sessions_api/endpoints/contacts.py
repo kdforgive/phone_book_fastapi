@@ -7,14 +7,29 @@ from core.endpoint_checks import EndpointFieldValidation
 from core.endpoint_checks import EndpointSessionValidation
 from typing import Optional
 import logging
+from functools import wraps
+
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post('/search_in_my_contacts', status_code=200, tags=['contacts'])
+# def user_id_validation(func):
+#     @wraps(func)
+#     def wrapper(*args, **kwargs):
+#         session = EndpointSessionValidation.session_check(kwargs['session_token'], kwargs['db'])
+#         if not EndpointSessionValidation.ttl_check(session, kwargs['session_token'], kwargs['db']):
+#             logger.info(f'token has expired')
+#             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+#         return func(*args, **kwargs)
+#     return wrapper
+
+
+@router.post('/search_in_my_contacts', status_code=200, response_model=list[schemas.CreateContactResponse], tags=['contacts'])
+# @user_id_validation
 def search_in_my_contacts(field: schemas.SelectFields, session_token: Optional[str] = Cookie(None),
-                          db: Session = Depends(database.get_db)):
+                          db: Session = Depends(database.get_db)) -> list[schemas.CreateContact]:
+
     session = EndpointSessionValidation.session_check(session_token, db)
     if not EndpointSessionValidation.ttl_check(session, session_token, db):
         logger.info(f'token has expired')
@@ -23,13 +38,15 @@ def search_in_my_contacts(field: schemas.SelectFields, session_token: Optional[s
     if field.field_name == 'email' and not EndpointFieldValidation.email_check(field.field_value):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='email not correct')
 
-    # QUESTION how to do allowed_fields, better with query or simple list ?
-    # allowed_fields = ['name', 'surname', 'phone', 'email', 'company', 'group_name']
     # if field not in db this query return empty list, so we can say wrong field data or no field in db
     allowed_fields = EndpointFieldValidation.allowed_fields_check(field.field_name, field.field_value, db)
     if not allowed_fields:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'wrong field_name or field_value data '
                                                                           f'or record is missing')
+    # check fields_to_show for correct field names
+    allowed_fields_to_show = EndpointFieldValidation.allowed_fields_to_show(field.fields_to_show)
+    if not allowed_fields_to_show:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'wrong field name')
 
     if field.field_name == '' or field.field_value == '':
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE)
