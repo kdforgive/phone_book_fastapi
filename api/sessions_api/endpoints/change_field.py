@@ -14,13 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.put('/change_field', status_code=200, tags=['contacts'])
+@EndpointSessionValidation.user_id_validation
 def change_field(field: schemas.ChangeFields, session_token: Optional[str] = Cookie(None),
                  db: Session = Depends(database.get_db)) -> None:
-
-    session = EndpointSessionValidation.session_check(session_token, db)
-    if not EndpointSessionValidation.ttl_check(session, session_token, db):
-        logger.info(f'token has expired')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     allowed_groups = EndpointFieldValidation.allowed_groups(db)
     if field.field_name_to_change == 'email' and not EndpointFieldValidation.email_check(field.field_value_to_change):

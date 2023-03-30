@@ -25,7 +25,9 @@ mycursor.execute('USE fastapi_homework1')
 # """
 
 # mycursor.execute(f"INSERT INTO users (user_name, age, sex, phone_number, password)"
-#                  f" VALUES ('user1', '18', 'male', '1112223333', '{Hash.bcrypt('password1')}')")
+#                  f" VALUES ('user2', '35', 'male', '1112223333', '{Hash.get_password_hash('password1')}')")
+
+# INSERT INTO users (user_name, age, sex, phone_number, password) VALUES ('user1', '18', 'male', '1112223333', '$2b$12$q7xb2zQPWI.D2kvW7eLLFOLguudSabrJt5OYM9MItXjoH3y5f7JYi')
 # db.commit()
 # mycursor.execute(f"INSERT INTO money (user_id, balance, credit_balance)"
 #                  f" VALUES ('1', '111', '123')")

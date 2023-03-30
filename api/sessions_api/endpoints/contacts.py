@@ -5,35 +5,18 @@ from db import api_models
 from core import schemas
 from core.endpoint_checks import EndpointFieldValidation
 from core.endpoint_checks import EndpointSessionValidation
-from typing import Optional
+from typing import Optional, List, Dict
 import logging
-from functools import wraps
-
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-# def user_id_validation(func):
-#     @wraps(func)
-#     def wrapper(*args, **kwargs):
-#         session = EndpointSessionValidation.session_check(kwargs['session_token'], kwargs['db'])
-#         if not EndpointSessionValidation.ttl_check(session, kwargs['session_token'], kwargs['db']):
-#             logger.info(f'token has expired')
-#             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-#         return func(*args, **kwargs)
-#     return wrapper
-
-
-@router.post('/search_in_my_contacts', status_code=200, response_model=list[schemas.CreateContactResponse], tags=['contacts'])
-# @user_id_validation
+@router.post('/search_in_my_contacts', status_code=200,
+             tags=['contacts'])
+@EndpointSessionValidation.user_id_validation
 def search_in_my_contacts(field: schemas.SelectFields, session_token: Optional[str] = Cookie(None),
-                          db: Session = Depends(database.get_db)) -> list[schemas.CreateContact]:
-
-    session = EndpointSessionValidation.session_check(session_token, db)
-    if not EndpointSessionValidation.ttl_check(session, session_token, db):
-        logger.info(f'token has expired')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+                          db: Session = Depends(database.get_db)) -> List[Dict[str, str]]:
 
     if field.field_name == 'email' and not EndpointFieldValidation.email_check(field.field_value):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='email not correct')
