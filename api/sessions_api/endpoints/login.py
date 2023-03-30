@@ -8,14 +8,13 @@ from core.hashing import Hash
 from datetime import datetime, timedelta
 import logging
 
-
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post('/login', status_code=200, tags=['user session'])
+@router.post('/login', status_code=200, response_model=None, tags=['user session'])
 def login(request: schemas.Login, response: Response, db: Session = Depends(database.get_db)) -> None:
-    user = api_models.Users.get_user_name(request.username, db)
+    user = api_models.Users.get_by_user_name(request.username, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect username or password')
     if not Hash.verify_password(request.password, user.password):

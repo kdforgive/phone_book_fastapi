@@ -6,6 +6,14 @@ class Login(BaseModel):
     username: str
     password: str
 
+    class Config:
+        schema_extra = {
+            'example': {
+                'username': 'user123',
+                'password': 'password123'
+            }
+        }
+
 
 class CreateContact(BaseModel):
     name: Optional[str] = None

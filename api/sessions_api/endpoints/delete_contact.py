@@ -8,19 +8,14 @@ from core.endpoint_checks import EndpointSessionValidation
 from db import api_models
 import logging
 
-
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 @router.delete('/delete_contact', status_code=200, tags=['contacts'])
+@EndpointSessionValidation.user_id_validation
 def delete_contact(field: schemas.DeleteContact, session_token: Optional[str] = Cookie(None),
                    db: Session = Depends(database.get_db)) -> None:
-
-    session = EndpointSessionValidation.session_check(session_token, db)
-    if not EndpointSessionValidation.ttl_check(session, session_token, db):
-        logger.info(f'token has expired')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     if field.field_name == 'email' and not EndpointFieldValidation.email_check(field.field_value):
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='email not correct')

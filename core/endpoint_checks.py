@@ -1,9 +1,13 @@
-from fastapi import HTTPException, status, Cookie, Depends
+from fastapi import HTTPException, status, Cookie, Depends, Request
 from datetime import datetime, timedelta
 from db import api_models
 from core import schemas
 import re
-from typing import Union
+from typing import Union, Optional
+from functools import wraps
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EndpointSessionValidation:
@@ -30,6 +34,17 @@ class EndpointSessionValidation:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         return session
 
+    @staticmethod
+    def user_id_validation(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            session = EndpointSessionValidation.session_check(kwargs['session_token'], kwargs['db'])
+            if not EndpointSessionValidation.ttl_check(session, kwargs['session_token'], kwargs['db']):
+                logger.info(f'token has expired')
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+            return func(*args, **kwargs)
+        return wrapper
+
 
 class EndpointFieldValidation:
 
@@ -41,7 +56,7 @@ class EndpointFieldValidation:
         return False
 
     @staticmethod
-    def allowed_fields_check(field_name: str, field_value: str, db, field_name_to_change: str = None)\
+    def allowed_fields_check(field_name: str, field_value: str, db, field_name_to_change: Optional[str] = None)\
             -> Union[list, bool]:
         allowed_fields = [key for key in schemas.CreateContact().__dict__]
         if field_name not in allowed_fields:

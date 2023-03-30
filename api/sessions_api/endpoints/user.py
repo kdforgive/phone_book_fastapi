@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get('/say_hello', status_code=200, tags=['user session'])
+@EndpointSessionValidation.user_id_validation
 def say_hello(db: Session = Depends(database.get_db), session_token: Optional[str] = Cookie(None)) -> str:
     session = EndpointSessionValidation.session_check(session_token, db)
     if not EndpointSessionValidation.ttl_check(session, session_token, db):

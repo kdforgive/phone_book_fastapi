@@ -13,13 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.post('/create_contact', status_code=200, tags=['contacts'])
+@EndpointSessionValidation.user_id_validation
 def create_contact(contact: schemas.CreateContact, session_token: Optional[str] = Cookie(None),
                    db: Session = Depends(database.get_db)) -> None:
-
-    session = EndpointSessionValidation.session_check(session_token, db)
-    if not EndpointSessionValidation.ttl_check(session, session_token, db):
-        logger.info(f'token has expired')
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
     # get user id by session_token from session table, to pass it to table Contacts for user_id field
     user_id = api_models.Sessions.get_session_user_id_by_session_token(session_token, db)
